@@ -1,0 +1,7 @@
+---------------------------------------------
+TO DO LIST FOR AUTOMATIC CONTROL NAVI PROJECT
+---------------------------------------------
+
+- Write prototype for global state class
+- Finish writing basic functions for Autopilot and LowController classes 
+- Test with Makefile
