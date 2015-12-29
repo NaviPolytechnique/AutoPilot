@@ -17,8 +17,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <cstdint>
-
-
+#include "util.hpp"
 
 
 class Autopilot {
@@ -44,17 +43,17 @@ public:
     
     void _update();
     
-    void _run();
+    void _run(); // TODO : complete
     
     void _sanity_check() const throw(std::string);
     
     
     
-    void setAltitudeTarget(uint8_t);
+    void setAltitudeTarget(uint8_t); //TODO
 
-    void take_off();
+    void take_off(); //TODO
     
-    void land();
+    void land(); //TODO
 
 
     
@@ -66,14 +65,13 @@ private:
     
     uint16_t _altitude_target; // Altitude target in cm
     uint16_t _wtg_attitude_target; // New altitude target in cm
-    uint16_t _tmp_altitude_target; // New altitude target in cm
     
     uint16_t _clock_counter; // For smoothing the target input (ms)
     uint16_t _interpolating_time; // For smoothing the target input (ms)
 
 
-    double _commands[4]; // Throttle,pitch,roll and yaw commands
-    double _interp_poly[4]; // For smoothing the target input;
+    Eigen::Vector4d _commands; // Throttle,pitch,roll and yaw commands
+    Eigen::Vector4d _interp_poly; // For smoothing the target input;
 
     bool _init;
     bool _took_off;

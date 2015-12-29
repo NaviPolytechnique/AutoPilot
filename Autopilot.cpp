@@ -17,7 +17,7 @@ Autopilot::Autopilot(uint8_t time_rate) :   _init(false),
 
                                             _time_rate(time_rate),
                                             _interpolating_time(5000),
-                                            _clock_counter(UINT16_MAX)
+                                            _clock_counter(0)
 {
     try {
         _initialize();
@@ -37,7 +37,6 @@ void Autopilot::_initialize() throw(std::string){
         _sanity_check();
     
         _altitude_target = 50; // TODO : change with config file
-        _tmp_altitude_target = 50; // TODO : same
         
         _init = true;
         
@@ -59,7 +58,12 @@ void Autopilot::_sanity_check() const throw(std::string) {
     // Lets check that the sampling time is at least superior to the functionning rate
     if (_interpolating_time <= _time_rate) throw std::string("Timing issue");
     
-    //TODO : add security (checks size of int for instance)
+    // Checks that all integers are fit
+    bool sanity_const = (_time_rate > 0 && _time_rate < UINT8_MAX);
+    if (!sanity_const) throw std::string("Rate time isn't feasible");
+    sanity_const = (_interpolating_time > 0 && _interpolating_time < UINT16_MAX);
+    if (!sanity_const) throw std::string("Interpolating time is not feasible");
+    
     
 }
 
@@ -79,8 +83,10 @@ void Autopilot::_run() {
         _update();
         switch(_fm) {
             case hovering : {
-                // PID pid_alti.write_target(_tmp_target);
-                // command = PID.calculate_command();
+                // calculate temporary target given polynom and clock
+                // command = PID.calculate_command(target);
+                //
+                break;
             }
             case trajectory_tracking:{
                 
@@ -98,19 +104,15 @@ void Autopilot::_update() {
     // Starts by checking if a new target was assigned
     
     if (_new_target) {
+        // interpolate polynom
         _altitude_target = _wtg_attitude_target;
         _clock_counter = 0;
-        // _interp_poly = update the interpolation polynom coeffs
         _new_target = false;
         
     }
     
     else {
-        if (_clock_counter < _interpolating_time) {
-             // tmp_target = updated target
             _clock_counter += _time_rate;
-        }
-        // else we change nothing, the target must remain const.
     }
     
     std::cout << "updated" << std::endl;
