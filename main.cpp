@@ -16,8 +16,6 @@ int main(int argc, const char * argv[]) {
     
     Autopilot _auto(10); // Autopilot with 10 ms time rate
     _auto._update();
-    
-    
 
     return 1;
 }
