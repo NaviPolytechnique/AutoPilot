@@ -11,7 +11,7 @@
 
 #include <stdio.h>
 #include "/usr/local/include/Dense"
-
+#include <iostream>
 namespace Autopilot_util {
     
     // Returns the value of interpolation polynom for smoothing the target at the current time
