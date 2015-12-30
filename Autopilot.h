@@ -18,6 +18,10 @@
 #include <iostream>
 #include <cstdint>
 #include "util.hpp"
+#include "Pilot_Exception.hpp"
+#include "Config.hpp"
+
+class Pilot_Exception; // forward declaration
 
 
 class Autopilot {
@@ -32,28 +36,27 @@ public:
 
     Autopilot();
     
-    
     Autopilot(uint8_t);
 
     ~Autopilot();
 
     
     
-    void _initialize() throw(std::string);
+    void _initialize() throw(Pilot_Exception);
     
     void _update();
     
-    void _run(); // TODO : complete
+    void _run(); // TO COMPLETE with PID 
     
-    void _sanity_check() const throw(std::string);
+    void _sanity_check() const throw(Pilot_Exception);
     
     
     
-    void setAltitudeTarget(uint8_t); //TODO
+    void setAltitudeTarget(uint16_t) throw(Pilot_Exception);
 
-    void take_off(); //TODO
+    void take_off(); //TO COMPLETE
     
-    void land(); //TODO
+    void land(); //TODO  : slowly decreases target until hits approx. 0 (10cm)
 
 
     
