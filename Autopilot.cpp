@@ -1,28 +1,29 @@
-// 
+//
 //  Autopilot.cpp
 //  Created by Louis Faury on 03/10/2015
-//  
-//  This class is the base element for the automatic flight of the quadricopter 
+//
+//  This class is the base element for the automatic flight of the quadricopter
 //
 
 
 
-#include "Autopilot.h"
+#include "Autopilot.hpp"
 
 
 
 Autopilot::Autopilot(uint8_t time_rate) :   _init(false),
-                                            _took_off(false),
-                                            _new_target(false),
+_took_off(false),
+_new_target(false),
 
-                                            _time_rate(time_rate),
-                                            _interpolating_time(INTERP_TIME),
-                                            _clock_counter(0)
+_time_rate(time_rate),
+_interpolating_time(INTERP_TIME),
+_clock_counter(0),
+_altitude_target(0)
 {
     try {
         _initialize();
         
-        std::cout << "Autopilot initiated" << std::endl;
+        std::cout << "Autopilot initialized" << std::endl;
     } catch(const Pilot_Exception& e) {
         std::cout << e.what() << std::endl;
     }
@@ -35,11 +36,9 @@ void Autopilot::_initialize() throw(Pilot_Exception){
     
     try {
         _sanity_check();
-    
-        _altitude_target = INI_ALTI_TARGET; // TODO : change with config file
         
         _init = true;
-        
+        // TODO : when _init, give the propellers a min speed to show everything is allright ?
     } catch (const Pilot_Exception& e) {
         std::cout << e.what() << std::endl;
         throw Pilot_Exception(Pilot_Exception::other,"Autopilot failed to init");
@@ -68,7 +67,7 @@ void Autopilot::_sanity_check() const throw(Pilot_Exception) {
 
 
 void Autopilot::_run() {
-
+    
     while (!_init) {
         //delay
     }
@@ -81,19 +80,22 @@ void Autopilot::_run() {
         _update();
         switch(_fm) {
             case hovering : {
-                // calculate temporary target given polynom and clock
-                //double tmp_target = Autopilot_util::calculate_tmp_target(_altitude_target,_interp_poly,_clock_counter,_interpolating_time);
-                // Then calculate the corresponding PID commands
-                // command = PID.calculate_command(target);
-                //
+                // calculates temporary target given polynom and clock
+                double tmp_target = Autopilot_util::calculate_tmp_target(_altitude_target,_interp_poly,_clock_counter,_interpolating_time);
+                // updates the different PID (when hovering, only the altitude target needs to be changed)
+                /*alti_PID(_state.getZ(),tmp_target);
+                 roll_PID(_state.getRoll());
+                 pitch_PID(_state.getPitch());
+                 yaw_PID(_state.getYaw());
+                 */
                 break;
             }
             case trajectory_tracking:{
                 
                 
             }
-                
         }
+        usleep(1000*_time_rate);
     }
 }
 
@@ -115,17 +117,15 @@ void Autopilot::_update() {
     }
     
     else {
-            if (_clock_counter < UINT16_MAX) _clock_counter += _time_rate; // Cannot overcome UINT16_MAX but doesn't really matter since the interpolating function is constant at this moment 
+        _clock_counter += (_clock_counter < UINT16_MAX ? _time_rate : 0); // Cannot overcome UINT16_MAX but doesn't really matter since the interpolating function is constant at this moment
     }
     
-    std::cout << "updated" << std::endl;
 }
 
 
 
 void Autopilot::setAltitudeTarget(uint16_t altitude_target) throw(Pilot_Exception) {
     if (altitude_target<0 || altitude_target > MAX_ALTI_TARGET) throw Pilot_Exception(Pilot_Exception::target,"Unreachable target");
-    // TODO : change those values with config
     _new_target = true;
     _wtg_attitude_target = altitude_target;
 }
@@ -133,8 +133,9 @@ void Autopilot::setAltitudeTarget(uint16_t altitude_target) throw(Pilot_Exceptio
 
 
 void Autopilot::take_off(){
-    // This function is a sign that everything is working allright. We simply put command U1 to a value so that the quadcopter does not lift but activite its propellers for a given amount of time.
-    // Then we can set a target
+    // When given the signal, the quadcopter lifts to INI_ALTI_TARGET
+    setAltitudeTarget(INI_ALTI_TARGET);
+    _fm = hovering;
     _took_off = true;
 }
 
