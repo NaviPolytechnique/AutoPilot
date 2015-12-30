@@ -9,12 +9,13 @@
 #include "util.hpp"
 
 
-int Autopilot_util::calculate_tmp_target(unsigned int target,Eigen::Vector4d& poly_coeff, unsigned int clock_counter, unsigned int interpolating_time) {
+double Autopilot_util::calculate_tmp_target(unsigned int target,Eigen::Vector4d& poly_coeff, unsigned int clock_counter, unsigned int interpolating_time) {
     // If we are over smoothing time, the target is the initial target
-    if (clock_counter >= interpolating_time) return target;
+    if (clock_counter > interpolating_time) return target;
     // Else we're using the smoothing polynom to calculate target
+    // Polynom being stored as {a,b,c,d} with p(x)=ax^3+bx^2+cx+d
     else return (
-                poly_coeff[2]*clock_counter+poly_coeff[1]*clock_counter*clock_counter+poly_coeff[0]*clock_counter*clock_counter*clock_counter);
+                poly_coeff[3]+poly_coeff[2]*clock_counter+poly_coeff[1]*clock_counter*clock_counter+poly_coeff[0]*clock_counter*clock_counter*clock_counter);
 }
 
 

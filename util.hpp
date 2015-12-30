@@ -14,8 +14,8 @@
 
 namespace Autopilot_util {
     
-    // Returns the inteprolation polynom for smoothing the target
-    int calculate_tmp_target(unsigned int,Eigen::Vector4d&,unsigned int,unsigned int);
+    // Returns the value of interpolation polynom for smoothing the target at the current time
+    double calculate_tmp_target(unsigned int,Eigen::Vector4d&,unsigned int,unsigned int);
     
     
     // Updates the polynomials coefficient for the target smoothing polynom
