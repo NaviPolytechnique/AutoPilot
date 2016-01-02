@@ -35,7 +35,7 @@ void Autopilot_util::update_poly(unsigned int old_target, unsigned int new_targe
     
     // Updates the polynom coefficients, which are in this programm as [a,b,c,d] : ax^3+bx^2+cx+d
     poly = A.partialPivLu().solve(b);
-    // We're giving the polynom a rescaling (sample time being in ms before)
+    // We're giving the polynom a rescaling (sample time being in stored as in second, but we're working in miliseconds)
     poly[0] /= 1000000000;
     poly[1] /= 1000000;
     poly[2] /= 1000;
