@@ -17,20 +17,20 @@
 // Time
 #define MIN_TIME_RATE 5 //ms
 #define INTERP_TIME 5 //s
-// PID
+// PID //TODO : set proper coefficient
 #define EXTREMUM_INTEGRAL_ERROR
-#define ALTI_KP
-#define ALTI_KI
-#define ALTI_KD
-#define PITCH_KP
-#define PITCH_KI
-#define PITCH_KD
-#define ROLL_KP
-#define ROLL_KI
-#define ROLL_KD
-#define YAW_KP
-#define YAW_KI
-#define YAW_KD
+#define ALTI_KP 1.
+#define ALTI_KI 1.
+#define ALTI_KD 1.
+#define PITCH_KP 1.
+#define PITCH_KI 1.
+#define PITCH_KD 1.
+#define ROLL_KP 1.
+#define ROLL_KI 1.
+#define ROLL_KD 1.
+#define YAW_KP 1.
+#define YAW_KI 1.
+#define YAW_KD 1.
 
 
 
