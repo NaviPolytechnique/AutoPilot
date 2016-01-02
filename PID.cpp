@@ -10,8 +10,7 @@
 
 
 
-
-PID::PID(uint8_t time_rate,float KP, float KD, float KI) :   _time_rate(time_rate),
+PID::PID(uint8_t time_rate,float KP, float KI, float KD) :   _time_rate(time_rate),
                                                                 _KP(KP),
                                                                 _KI(KI),
                                                                 _KD(KD),
@@ -25,14 +24,16 @@ PID::PID(uint8_t time_rate,float KP, float KD, float KI) :   _time_rate(time_rat
 
 
 
+// Fonctions à checker avec Charles (indépendance du time rate ++ )
 void PID::_update(float state) {
     _state = state;
     
     float previous_error(_error);
-    _error = _target - _state;
-    _derivative_error = (_error-previous_error)/(_time_rate)*1000; // 1000 : conversion ms in s.
-    // Implement ways of saturationg the integral error with a saturator
-    _integral_error += (_time_rate*_error)/1000;
+    _error = _state - _target;
+    _derivative_error = (_error-previous_error);
+    // TODO : Implement ways of saturationg the integral error with a saturator
+    // Voir ordre de grandeur et limite de linéarité (doc)
+    _integral_error += _error;
 }
 
 
@@ -41,17 +42,18 @@ void PID::_update(float state, float target) {
     _state = state;
     
     float previous_error(_error);
-    _error = _target - _state;
-    _derivative_error = (_error-previous_error)/(_time_rate)*1000; // 1000 : conversion ms in s.
-    // Implement ways of saturationg the integral error with a saturator
-    _integral_error += (_time_rate*_error)/1000;
+    _error = _state - _target;
+    _derivative_error = _error-previous_error;
+    // TODO : Implement ways of saturationg the integral error with a saturator
+    // Voir ordre de grandeur et limite de linéarité (doc)
+    _integral_error += _error;
 }
 
 
 
 
 float PID::calculate_command() const {
-    return _KI*_error+_KD*_derivative_error+_KI*_integral_error;
+    return _KP*_error+_KD*_derivative_error+_KI*_integral_error;
 }
 
 
@@ -60,4 +62,20 @@ void PID::reset() {
     // Put back to 0 all the errors (but derivative to avoid jumps in command)
     _error = 0;
     _integral_error = 0;
+}
+
+
+
+float PID::getState() {
+    return _state;
+}
+
+
+
+std::string PID::sum_up() {
+    std::string s = std::to_string(_state);
+    
+    std::cout << "Error : " << _error << '\n' << "Integral error : " << _integral_error << '\n' << "Derivative error : " << _derivative_error << '\n' << "Command : " << calculate_command() << std::endl;
+    
+    return s;
 }

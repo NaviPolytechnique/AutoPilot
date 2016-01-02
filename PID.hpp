@@ -11,8 +11,7 @@
 
 #include <stdio.h>
 #include <cstdint>
-
-// TODO : class method for dealing with yaw sign problem 
+#include <iostream>
 
 
 class PID {
@@ -23,17 +22,21 @@ public:
     
     PID(uint8_t,float,float,float);
     
-    // Updates target and state, as well as errors
+    // Updates target, as well as errors
     void _update(float);
+    
+    // Updates the target and state, as well as errors
+    void _update(float,float);
     
     // Outputs the command (U_i)
     float calculate_command() const;
     
-    // Update the target and state
-    void _update(float,float);
-    
     // Reset PID (when a new target is received by the autopilot)
     void reset();
+    
+    std::string sum_up();
+    
+    float getState();
     
     
 private:
