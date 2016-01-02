@@ -20,6 +20,7 @@ _interpolating_time(INTERP_TIME),
 _clock_counter(0),
 _altitude_target(0)
 {
+    
     try {
         _initialize();
         
@@ -38,6 +39,7 @@ void Autopilot::_initialize() throw(Pilot_Exception){
         _sanity_check();
         
         _init = true;
+        
         // TODO : when _init, give the propellers a min speed to show everything is allright ?
     } catch (const Pilot_Exception& e) {
         std::cout << e.what() << std::endl;
@@ -45,7 +47,16 @@ void Autopilot::_initialize() throw(Pilot_Exception){
         
     }
     
+    PID* alti_PID = new PID(_time_rate,ALTI_KP,ALTI_KD,ALTI_KD);
+    PID* pitch_PID = new PID(_time_rate,PITCH_KP,PITCH_KD,PITCH_KD);
+    PID* roll_PID = new PID(_time_rate,ROLL_KP,ROLL_KD,ROLL_KD);
+    PID* yaw_PID = new PID(_time_rate,YAW_KP,YAW_KD,YAW_KD);
+    _alti_PID = alti_PID;
+    _roll_PID = roll_PID;
+    _pitch_PID = pitch_PID;
+    _yaw_PID = yaw_PID;
 }
+
 
 
 
@@ -83,10 +94,11 @@ void Autopilot::_run() {
                 // calculates temporary target given polynom and clock
                 double tmp_target = Autopilot_util::calculate_tmp_target(_altitude_target,_interp_poly,_clock_counter,_interpolating_time);
                 // updates the different PID (when hovering, only the altitude target needs to be changed)
-                /*alti_PID(_state.getZ(),tmp_target);
-                 roll_PID(_state.getRoll());
-                 pitch_PID(_state.getPitch());
-                 yaw_PID(_state.getYaw());
+                // Missing State class :-(
+                /*alti_PID->_update(_state.getZ(),tmp_target);
+                 roll_PID->_update(_state.getRoll());
+                 pitch_PID->_update(_state.getPitch());
+                 yaw_PID->_update(_state.getYaw());
                  */
                 break;
             }
@@ -111,6 +123,8 @@ void Autopilot::_update() {
         // We udpate the current altitude target and put the clock counter back to 0
         _altitude_target = _wtg_attitude_target;
         _clock_counter = 0;
+        // Reset the alti PID
+        _alti_PID->reset();
         // Now there is no new target
         _new_target = false;
         
@@ -125,7 +139,9 @@ void Autopilot::_update() {
 
 
 void Autopilot::setAltitudeTarget(uint16_t altitude_target) throw(Pilot_Exception) {
+    // Some security check
     if (altitude_target<0 || altitude_target > MAX_ALTI_TARGET) throw Pilot_Exception(Pilot_Exception::target,"Unreachable target");
+    // Sets up _new_target to true and the waiting target to the argument altitude target 
     _new_target = true;
     _wtg_attitude_target = altitude_target;
 }
@@ -141,5 +157,13 @@ void Autopilot::take_off(){
 
 
 Autopilot::~Autopilot(){
+    delete _alti_PID;
+    delete _roll_PID;
+    delete _pitch_PID;
+    delete _yaw_PID;
+    _alti_PID = 0;
+    _roll_PID = 0;
+    _pitch_PID = 0;
+    _yaw_PID = 0;
 }
 

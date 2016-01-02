@@ -25,6 +25,8 @@
 
 class Pilot_Exception; // forward declaration
 
+class PID; // forward declaration
+
 class Autopilot {
     
 public:
@@ -84,10 +86,10 @@ private:
     
     FLIGHT_MODE _fm;
     
-    PID* alti_PID;
-    PID* pitch_PID;
-    PID* roll_PID;
-    PID* yaw_PID;
+    PID* _alti_PID;
+    PID* _pitch_PID;
+    PID* _roll_PID;
+    PID* _yaw_PID;
     
     
     //State* _state : ptr to the state of the drone (do forward declaration)
