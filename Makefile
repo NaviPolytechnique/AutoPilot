@@ -3,25 +3,28 @@
 
 # Variable
 CXX = g++
-CXXFLAGS =-g 
+CXXFLAGS =-g -std=c++11 
 
 
 # Rules 
 
-main : main.o Autopilot.o Pilot_Exception.o util.o
-	g++ $^ -o $@
+main : main.o Autopilot.o Pilot_Exception.o util.o PID.o
+	g++ $(CXXFLAGS) $^ -o $@
 
 main.o : main.cpp
-	g++ -c $^ -o $@
+	g++ $(CXXFLAGS) -c $^ -o $@
 
 Autopilot.o : Autopilot.cpp 
-	g++ -c $^ -o $@
+	g++ $(CXXFLAGS) -c $^ -o $@
 
 util.o : util.cpp
-	g++ -c $^ -o $@
+	g++ $(CXXFLAGS) -c $^ -o $@
 
 Pilot_Exception.o : Pilot_Exception.cpp
-	g++ -c $^ -o $@
+	g++ $(CXXFLAGS) -c $^ -o $@
+
+PID.o : PID.cpp
+	g++ $(CXXFLAGS) -c $^ -o $@
 
 clean : 
 	rm -rf *.o
@@ -29,3 +32,4 @@ clean :
 all : 
 	make main 
 	make clean
+	@echo SUCESS
