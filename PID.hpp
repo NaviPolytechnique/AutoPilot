@@ -22,7 +22,7 @@ public:
     
     PID(uint8_t,float,float,float);
     
-    // Updates target, as well as errors
+    // Updates state, as well as errors
     void _update(float);
     
     // Updates the target and state, as well as errors
