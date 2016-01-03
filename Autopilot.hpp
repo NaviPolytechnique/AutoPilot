@@ -22,10 +22,14 @@
 #include "Config.hpp"
 #include "PID.hpp"
 #include <unistd.h>
+#include "navi_State.hpp"
 
 class Pilot_Exception; // forward declaration
 
 class PID; // forward declaration
+
+class navi_State; // forward declaration
+
 
 class Autopilot {
     
@@ -39,7 +43,7 @@ public:
     
     Autopilot();
     
-    Autopilot(uint8_t);
+    Autopilot(uint8_t,navi_State*);
     
     ~Autopilot();
     
@@ -64,7 +68,6 @@ public:
     
     
     
-    
 private:
     
     const uint8_t _time_rate; // Controller time rate in ms
@@ -76,8 +79,8 @@ private:
     uint16_t _interpolating_time; // For smoothing the target input (SECOND)
     
     
-    Eigen::Vector4d _commands; // Throttle,pitch,roll and yaw commands
-    Eigen::Vector4d _interp_poly; // For smoothing the target input;
+    Eigen::Vector4f _commands; // Throttle,pitch,roll and yaw commands
+    Eigen::Vector4f _interp_poly; // For smoothing the target input;
     
     bool _init;
     bool _took_off;
@@ -92,7 +95,7 @@ private:
     PID* _yaw_PID;
     
     
-    //State* _state : ptr to the state of the drone (do forward declaration)
+    navi_State* _state; // ptr to the state of the drone
 };
 
 #endif

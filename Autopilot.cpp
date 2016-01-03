@@ -11,14 +11,16 @@
 
 
 
-Autopilot::Autopilot(uint8_t time_rate) :   _init(false),
+Autopilot::Autopilot(uint8_t time_rate,navi_State* state) :   _init(false),
 _took_off(false),
 _new_target(false),
 
 _time_rate(time_rate),
 _interpolating_time(INTERP_TIME),
 _clock_counter(0),
-_altitude_target(0)
+_altitude_target(0),
+
+_state(state)
 {
     
     try {
@@ -92,14 +94,13 @@ void Autopilot::_run() {
         switch(_fm) {
             case hovering : {
                 // calculates temporary target given polynom and clock
-                double tmp_target = Autopilot_util::calculate_tmp_target(_altitude_target,_interp_poly,_clock_counter,_interpolating_time);
+                float tmp_target = Autopilot_util::calculate_tmp_target(_altitude_target,_interp_poly,_clock_counter,_interpolating_time);
                 // updates the different PID (when hovering, only the altitude target needs to be changed)
                 // Missing State class :-(
-                /*alti_PID->_update(_state.getZ(),tmp_target);
-                 roll_PID->_update(_state.getRoll());
-                 pitch_PID->_update(_state.getPitch());
-                 yaw_PID->_update(_state.getYaw());
-                 */
+                _alti_PID->_update(_state->get_Z(),tmp_target);
+                 _roll_PID->_update(_state->get_Roll());
+                 _pitch_PID->_update(_state->get_Pitch());
+                 _yaw_PID->_update(_state->get_Yaw());
                 break;
             }
             case trajectory_tracking:{
@@ -107,7 +108,7 @@ void Autopilot::_run() {
                 
             }
         }
-        usleep(1000*_time_rate);
+        usleep(1000*_time_rate); //TODO : change with time clock
     }
 }
 
