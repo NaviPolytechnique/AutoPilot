@@ -69,7 +69,7 @@ void Autopilot::_sanity_check() const throw(Pilot_Exception) {
 
 
 
-void Autopilot::_run() {
+void Autopilot::run() {
     
     while (!_init) {
         //delay
