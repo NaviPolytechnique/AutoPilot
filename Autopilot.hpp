@@ -52,7 +52,7 @@ public:
     
     void _update();
     
-    void run(); // TO COMPLETE with PID
+    void* run(); // TO COMPLETE with PID
     
     void start();
     
@@ -72,7 +72,7 @@ public:
     
     void setAltitudeTarget(uint16_t a);
     
-    void setWtgAltitudeTarget(uint16_t a)
+    void setWtgAltitudeTarget(uint16_t a);
     
     
     
@@ -88,7 +88,7 @@ private:
     uint16_t _altitude_target; // Altitude target in cm
     
     pthread_mutex_t wtg_alt_target_mutex;
-    uint16_t _wtg_attitude_target; // New altitude target in cm
+    uint16_t _wtg_altitude_target; // New altitude target in cm
     
     uint16_t _clock_counter; // For smoothing the target input (ms)
     uint16_t _interpolating_time; // For smoothing the target input (SECOND)

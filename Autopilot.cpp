@@ -19,7 +19,7 @@ _time_rate(time_rate),
 _interpolating_time(INTERP_TIME),
 _clock_counter(0),
 _altitude_target(0),
-drone(drone_),
+drone(drone_)
 {
     try {
         _initialize();
@@ -69,7 +69,7 @@ void Autopilot::_sanity_check() const throw(Pilot_Exception) {
 
 
 
-void Autopilot::run() {
+void* Autopilot::run() {
     
     while (!_init) {
         //delay
@@ -156,7 +156,7 @@ void Autopilot::setAltitudeTarget(uint16_t alt){
 
 void Autopilot::setWtgAltitudeTarget(uint16_t alt){
     pthread_mutex_lock(&wtg_alt_target_mutex);
-    _wtg_attitude_target = alt;
+    _wtg_altitude_target = alt;
     pthread_mutex_unlock(&wtg_alt_target_mutex);
 };
 

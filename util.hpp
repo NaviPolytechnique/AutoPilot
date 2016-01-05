@@ -10,7 +10,7 @@
 #define util_hpp
 
 #include <stdio.h>
-#include "/usr/local/include/Dense"
+#include "/usr/local/include/Eigen/Dense"
 #include <iostream>
 namespace Autopilot_util {
     
