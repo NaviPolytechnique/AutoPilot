@@ -6,7 +6,7 @@
 //  Copyright © 2015 Louis Faury. All rights reserved.
 //
 
-#include <iostream>
+/*#include <iostream>
 #include "Autopilot.h"
 #include "util.hpp"
 
@@ -19,3 +19,4 @@ int main(int argc, const char * argv[]) {
 
     return 1;
 }
+/*

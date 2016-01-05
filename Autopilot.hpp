@@ -21,11 +21,16 @@
 #include "Pilot_Exception.hpp"
 #include "Config.hpp"
 #include "PID.hpp"
+#include "Drone.h"
+#include "Runnable.h"
 #include <unistd.h>
+#include <pthread.h>
+
+extern int autoPilotThread;
 
 class Pilot_Exception; // forward declaration
 
-class Autopilot {
+class Autopilot : public Runnable {
     
 public:
     
@@ -37,7 +42,7 @@ public:
     
     Autopilot();
     
-    Autopilot(uint8_t);
+    Autopilot(Drone* drone_, uint8_t time_rate); // ne vaudrait-il pas mieux mettre le time rate en parmètre de config ?
     
     ~Autopilot();
     
@@ -47,17 +52,27 @@ public:
     
     void _update();
     
-    void _run(); // TO COMPLETE with PID
+    void run(); // TO COMPLETE with PID
+    
+    void start();
     
     void _sanity_check() const throw(Pilot_Exception);
     
     
     
-    void setAltitudeTarget(uint16_t) throw(Pilot_Exception);
+    void setNewTarget(uint16_t) throw(Pilot_Exception);
     
     void take_off(); //TO COMPLETE
     
     void land(); //TODO  : slowly decreases target until hits approx. 0 (10cm)
+    
+    uint16_t getAltitudeTarget();
+    
+    uint16_t getWtgAltitudeTarget();
+    
+    void setAltitudeTarget(uint16_t a);
+    
+    void setWtgAltitudeTarget(uint16_t a)
     
     
     
@@ -65,9 +80,14 @@ public:
     
 private:
     
+    Drone* drone;
+    
     const uint8_t _time_rate; // Controller time rate in ms
     
+    pthread_mutex_t alt_target_mutex;
     uint16_t _altitude_target; // Altitude target in cm
+    
+    pthread_mutex_t wtg_alt_target_mutex;
     uint16_t _wtg_attitude_target; // New altitude target in cm
     
     uint16_t _clock_counter; // For smoothing the target input (ms)
