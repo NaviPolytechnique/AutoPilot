@@ -11,7 +11,8 @@
 
 
 
-Autopilot::Autopilot(uint8_t time_rate,navi_State* state) :   _init(false),
+
+Autopilot::Autopilot(Drone* drone_ , uint8_t time_rate) :   _init(false),
 _took_off(false),
 _new_target(false),
 
@@ -19,8 +20,7 @@ _time_rate(time_rate),
 _interpolating_time(INTERP_TIME),
 _clock_counter(0),
 _altitude_target(0),
-
-_state(state)
+drone(drone_)
 {
     
     try {
@@ -32,7 +32,9 @@ _state(state)
     }
 }
 
-
+void Autopilot::start(){
+    drone->startThread(this, autoPilotThread);
+}
 
 
 void Autopilot::_initialize() throw(Pilot_Exception){
@@ -79,7 +81,7 @@ void Autopilot::_sanity_check() const throw(Pilot_Exception) {
 
 
 
-void Autopilot::_run() {
+void* Autopilot::run() {
     
     while (!_init) {
         //delay
@@ -94,7 +96,8 @@ void Autopilot::_run() {
         switch(_fm) {
             case hovering : {
                 // calculates temporary target given polynom and clock
-                float tmp_target = Autopilot_util::calculate_tmp_target(_altitude_target,_interp_poly,_clock_counter,_interpolating_time);
+
+                double tmp_target = Autopilot_util::calculate_tmp_target(getAltitudeTarget(),_interp_poly,_clock_counter,_interpolating_time);
                 // updates the different PID (when hovering, only the altitude target needs to be changed)
                 // Missing State class :-(
                 _alti_PID->_update(_state->get_Z(),tmp_target);
@@ -120,9 +123,9 @@ void Autopilot::_update() {
     
     if (_new_target) {
         // New target --> Lets update the polynom
-        Autopilot_util::update_poly(_altitude_target,_wtg_attitude_target,_interpolating_time,_interp_poly);
+        Autopilot_util::update_poly(getAltitudeTarget(),getWtgAltitudeTarget(),_interpolating_time,_interp_poly);
         // We udpate the current altitude target and put the clock counter back to 0
-        _altitude_target = _wtg_attitude_target;
+        setAltitudeTarget(getWtgAltitudeTarget());
         _clock_counter = 0;
         // Reset the alti PID
         _alti_PID->reset();
@@ -139,19 +142,19 @@ void Autopilot::_update() {
 
 
 
-void Autopilot::setAltitudeTarget(uint16_t altitude_target) throw(Pilot_Exception) {
-    // Some security check
+
+void Autopilot::setNewTarget(uint16_t altitude_target) throw(Pilot_Exception) {
     if (altitude_target<0 || altitude_target > MAX_ALTI_TARGET) throw Pilot_Exception(Pilot_Exception::target,"Unreachable target");
     // Sets up _new_target to true and the waiting target to the argument altitude target 
     _new_target = true;
-    _wtg_attitude_target = altitude_target;
+    setWtgAltitudeTarget(altitude_target);
 }
 
 
 
 void Autopilot::take_off(){
     // When given the signal, the quadcopter lifts to INI_ALTI_TARGET
-    setAltitudeTarget(INI_ALTI_TARGET);
+    setNewTarget(INI_ALTI_TARGET);
     _fm = hovering;
     _took_off = true;
 }
@@ -168,3 +171,32 @@ Autopilot::~Autopilot(){
     _yaw_PID = 0;
 }
 
+
+void Autopilot::setAltitudeTarget(uint16_t alt){
+    pthread_mutex_lock(&alt_target_mutex);
+    _altitude_target = alt;
+    pthread_mutex_unlock(&alt_target_mutex);
+};
+
+
+void Autopilot::setWtgAltitudeTarget(uint16_t alt){
+    pthread_mutex_lock(&wtg_alt_target_mutex);
+    _wtg_altitude_target = alt;
+    pthread_mutex_unlock(&wtg_alt_target_mutex);
+};
+
+uint16_t Autopilot::getAltitudeTarget(){
+    uint16_t r;
+    pthread_mutex_lock(&alt_target_mutex);
+    r = _altitude_target;
+    pthread_mutex_unlock(&alt_target_mutex);
+    return r;
+};
+
+uint16_t Autopilot::getWtgAltitudeTarget(){
+    uint16_t r;
+    pthread_mutex_lock(&wtg_alt_target_mutex);
+    r = _wtg_altitude_target;
+    pthread_mutex_unlock(&wtg_alt_target_mutex);
+    return r;
+};
