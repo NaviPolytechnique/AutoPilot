@@ -10,16 +10,22 @@
 #define util_hpp
 
 #include <stdio.h>
-#include "/usr/local/include/Eigen/Dense"
+#include "/usr/local/include/Dense"
 #include <iostream>
+
 namespace Autopilot_util {
     
     // Returns the value of interpolation polynom for smoothing the target at the current time
-    double calculate_tmp_target(unsigned int,Eigen::Vector4d&,unsigned int,unsigned int);
+    float calculate_tmp_target(unsigned int,Eigen::Vector4f&,unsigned int,unsigned int);
     
+    // Returns the value of interpolation polynom for super smoothing the target at the current time
+    float calculate_tmp_SuperSmooth_target(unsigned int, Eigen::Vector4f&, unsigned int, unsigned int);
     
     // Updates the polynomials coefficient for the target smoothing polynom
-    void update_poly(unsigned int,unsigned int,unsigned int,Eigen::Vector4d&);
+    void update_poly(unsigned int,unsigned int,unsigned int,Eigen::Vector4f&);
+    
+    // Updates the polynomials coefficent for the target super smoothing polynom
+    void update_SuperSmoothpoly(unsigned int, unsigned int, unsigned int,Eigen::Vector4f&);
 
 }
 

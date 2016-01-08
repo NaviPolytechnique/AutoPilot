@@ -11,29 +11,49 @@
 
 #include <stdio.h>
 #include <cstdint>
-
-// TODO : class method for dealing with yaw sign problem 
-
+#include <iostream>
+#include "Config.hpp"
 
 class PID {
     
 public:
-    
+	
     PID();
-    
+
+    /* \brief Main constructor of the PID class
+     * \param uint8_t : time_rate (ms, given by master class Autopilot)
+     * \param float : KP
+     * \param float : KI
+     * \param float : KD
+     */    
     PID(uint8_t,float,float,float);
     
-    // Updates target and state, as well as errors
+    /* \brief Update the state and erros 
+     * \param float : state (z in cm)
+     */
     void _update(float);
     
-    // Outputs the command (U_i)
-    float calculate_command() const;
-    
-    // Update the target and state
+
+    /* \brief Update the state,target and erros 
+     * \param float : state (z in cm)
+     * \param float : target (ztarget in cm)
+     */
     void _update(float,float);
     
-    // Reset PID (when a new target is received by the autopilot)
+    /* \brief Outputs the command 
+     */
+    float calculate_command() const;
+    
+    /* \brief Resets (all erros to 0)
+     */
     void reset();
+    
+    /* Functions for develpment and tests 
+     */
+
+    std::string sum_up();
+    
+    float getState();
     
     
 private:

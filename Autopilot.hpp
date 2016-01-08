@@ -21,96 +21,113 @@
 #include "Pilot_Exception.hpp"
 #include "Config.hpp"
 #include "PID.hpp"
-#include "Drone.h"
-#include "Runnable.h"
 #include <unistd.h>
-#include <pthread.h>
-
-extern int autoPilotThread;
+#include "navi_State.hpp"
 
 class Pilot_Exception; // forward declaration
 
-class Autopilot : public Runnable {
+class PID; // forward declaration
+
+class navi_State; // forward declaration
+
+
+class Autopilot {
     
 public:
     
+    /* \brief Flight mode for the quadricopter 
+     * \brief Hovering for stabilisation and altitude command 
+     * \brief Trajectory tracking for stabilisation aroud reference trajectory 
+     */	
     enum FLIGHT_MODE{
         hovering,
         trajectory_tracking
     };
     
-    
+    /* \brief Basic constructor (obsolete)
+     */
     Autopilot();
     
-    Autopilot(Drone* drone_, uint8_t time_rate); // ne vaudrait-il pas mieux mettre le time rate en parmètre de config ?
+    /* \brief Main constructor 
+     * \param uint8_t : time rate 
+     * \param navi_State : ptr to the state class of the drone 
+     */
+    Autopilot(uint8_t,navi_State*);
     
     ~Autopilot();
     
     
-    
+    /* \brief Initialise the autopilot
+     * Autopilot will not run if not initiliazed properly
+     */
     void _initialize() throw(Pilot_Exception);
     
+    /* \brief Update the local clock and checks if a new target has been assigned to the autopilot
+     * \throw Pilot_Exception if initialize went wrong 
+     */
     void _update();
     
-    void* run(); // TO COMPLETE with PID
-    
-    void start();
-    
+    /* \brief Main method, whill will continuously : 
+     * - Update target and smoothing polynomial function 
+     * - Update PID controllers (hovering)
+     * - Update LQR (trajectory tracking)
+     */
+    void _run(); 
+   
+    /* \brief Runs a sanity check over the attributes of the drone (for _init())
+     * \throw Pilot_Exception if system is not sane 
+     */ 
     void _sanity_check() const throw(Pilot_Exception);
     
     
+    /* \brief Sets altitude target for the autopilot 
+     * \param uint16_t : 
+     * \throw : Pilot_Exception if target is not reachable 
+     */
+    void setAltitudeTarget(uint16_t) throw(Pilot_Exception);
     
-    void setNewTarget(uint16_t) throw(Pilot_Exception);
+    /* \brief Take off command 
+     */
+    void take_off(); 
     
-    void take_off(); //TO COMPLETE
-    
+    /* \brief Land command 
+     */
     void land(); //TODO  : slowly decreases target until hits approx. 0 (10cm)
     
-    uint16_t getAltitudeTarget();
-    
-    uint16_t getWtgAltitudeTarget();
-    
-    void setAltitudeTarget(uint16_t a);
-    
-    void setWtgAltitudeTarget(uint16_t a);
-    
-    
+    /* \brief Updates the command vector thanks to the PID controller 
+     */
+    void update_commands();
     
     
     
 private:
     
-    Drone* drone;
-    
     const uint8_t _time_rate; // Controller time rate in ms
     
-    pthread_mutex_t alt_target_mutex;
-    uint16_t _altitude_target; // Altitude target in cm
-    
-    pthread_mutex_t wtg_alt_target_mutex;
-    uint16_t _wtg_altitude_target; // New altitude target in cm
+    uint16_t _altitude_target; // Altitude target in cm // TODO : protect
+    uint16_t _wtg_attitude_target; // New altitude target in cm // TODO : protect
     
     uint16_t _clock_counter; // For smoothing the target input (ms)
     uint16_t _interpolating_time; // For smoothing the target input (SECOND)
     
     
-    Eigen::Vector4d _commands; // Throttle,pitch,roll and yaw commands
-    Eigen::Vector4d _interp_poly; // For smoothing the target input;
+    Eigen::Vector4f _commands; // Throttle,pitch,roll and yaw commands
+    Eigen::Vector4f _interp_poly; // For smoothing the target input
     
-    bool _init;
-    bool _took_off;
-    bool _new_target;
+    bool _init; // TODO : protéger
+    bool _took_off; // TODO : protéger 
+    bool _new_target; 
     
     
     FLIGHT_MODE _fm;
     
-    PID* alti_PID;
-    PID* pitch_PID;
-    PID* roll_PID;
-    PID* yaw_PID;
+    PID* _alti_PID;
+    PID* _pitch_PID;
+    PID* _roll_PID;
+    PID* _yaw_PID;
     
     
-    //State* _state : ptr to the state of the drone (do forward declaration)
+    navi_State* _state; // ptr to the state of the drone
 };
 
 #endif
